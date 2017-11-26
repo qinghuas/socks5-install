@@ -27,5 +27,5 @@ bash ss5.sh
 
 其他
 ---
-1.可以在安装Socks5之前安装BBR/锐速来为Socks5加速
+1.可以在安装Socks5之前安装BBR/锐速来为Socks5加速  
 2.Socks5安装完成后，需要添加用户才能使用
