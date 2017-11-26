@@ -17,7 +17,9 @@ apt-get -y install git wget curl zip unzip screen;wget "https://raw.githubuserco
 
 然后：  
 
-`bash ss5.sh`
+```
+bash ss5.sh
+```
 
 截图
 ---
