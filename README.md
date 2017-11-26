@@ -15,7 +15,8 @@ Debian/Ubuntu:
 apt-get -y install git wget curl zip unzip screen;wget "https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5.sh"
 ```
 
-然后：   
+然后：  
+
 `bash ss5.sh`
 
 截图
