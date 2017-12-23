@@ -3,7 +3,7 @@ Telegram支持Socks5代理，设置好后就可以当“QQ”用了，网上的�
 
 安装
 ---
-首先
+首先  
 Centos:
 ```
 yum -y install git wget curl zip unzip screen
@@ -24,8 +24,10 @@ bash ss5.sh
 ---
 用户添加 / 删除  
 `bash ss5.sh  user {add|del}`  
+
 Socks5 安装 / 卸载  
 `bash ss5.sh {install|uninstall}`  
+
 Socks5 启动 / 停止 / 重启 / 状态  
 `bash ss5.sh {start|stop|restart|status}`  
 
@@ -41,4 +43,5 @@ Socks5 启动 / 停止 / 重启 / 状态
 其他说明
 ---
 1.可以在安装Socks5之前安装BBR/锐速来为Socks5加速  
+
 2.Socks5安装完成后，需要添加用户才能使用
