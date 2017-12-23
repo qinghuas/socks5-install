@@ -3,11 +3,11 @@ Telegram支持Socks5代理，设置好后就可以当“QQ”用了，网上的�
 
 准备
 ---
-Centos:
+Centos
 ```
 yum -y install git wget curl zip unzip screen
 ```
-Debian/Ubuntu:
+Debian/Ubuntu
 ```
 apt-get -y install git wget curl zip unzip screen
 ```
