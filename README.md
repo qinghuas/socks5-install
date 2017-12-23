@@ -1,7 +1,7 @@
 # Socks5 Install
 Telegram支持Socks5代理，设置好后就可以当“QQ”用了，网上的教程均是手动部署，而我能懒则懒，因此本脚本应运而生。脚本提供最基本的功能，即安装 / 卸载Socks5，添加 / 删除用户
 
-安装
+准备
 ---
 Centos:
 ```
@@ -11,6 +11,9 @@ Debian/Ubuntu:
 ```
 apt-get -y install git wget curl zip unzip screen
 ```
+
+安装
+---
 ```
 wget https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5.sh
 ```
