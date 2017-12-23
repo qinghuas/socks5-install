@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Check_OS(){
+CHECK_OS(){
 	if [[ -f /etc/redhat-release ]];then
 		release="centos"
 	elif cat /etc/issue | grep -q -E -i "debian";then
@@ -18,132 +18,198 @@ Check_OS(){
 	fi
 }
 
-Install_Socks5(){
-	#环境
+INSTALL_CHECK(){
+	if [ ! -f /etc/opt/ss5/ss5.conf ];then
+		echo "Socks5似乎尚未安装.";exit
+	fi
+}
+
+ADD_USER(){
+	INSTALL_CHECK
+	read -p "请设置连接用户:" USER_NAME
+		if [[ ${USER_NAME} = '' ]];then
+			echo "该项不允许为空.";exit
+		fi
+	read -p "请设置连接密码:" USER_PASSWD
+		if [[ ${USER_PASSWD} = '' ]];then
+			echo "该项不允许为空.";exit
+		fi
+	echo "${USER_NAME} ${USER_PASSWD}" >> /etc/opt/ss5/ss5.passwd
+	service ss5 start > /dev/null
+	
+	IP_ADDRESS=`curl -s https://ipv4.appspot.com`
+	echo "连接地址:${IP_ADDRESS} 连接端口:1080 连接用户:${USER_NAME},连接密码:${USER_PASSWD}"
+}
+
+DELETE_USER(){
+	INSTALL_CHECK
+	echo "当前用户如下:"
+	cat -n /etc/opt/ss5/ss5.passwd;echo
+	
+	read -p "需要删除的用户ID:" DELETE_USER_ID
+		if [[ ${DELETE_USER_ID} = '' ]];then
+			echo "该项不允许为空.";exit
+		fi
+		
+	sed -i "${DELETE_USER_ID}d" /etc/opt/ss5/ss5.passwd
+	service ss5 start > /dev/null
+	echo "删除完成."
+}
+
+CLOSE_THE_FIREWALL(){
+
+	CLOSE_THE_IPTABLES(){
+		iptables -F
+		iptables -X
+		iptables -I INPUT -p tcp -m tcp --dport 1:65535 -j ACCEPT
+		iptables -I INPUT -p udp -m udp --dport 1:65535 -j ACCEPT
+		iptables-save > /etc/sysconfig/iptables
+		echo 'iptables-restore /etc/sysconfig/iptables' >> /etc/rc.local
+	}
+
+	CLOSE_THE_FIREWALLD(){
+		systemctl stop firewalld.service
+		systemctl disable firewalld.service
+	}
+
+	case "${release}" in
+	centos)
+		CLOSE_THE_IPTABLES
+		CLOSE_THE_FIREWALLD;;
+	*)
+		CLOSE_THE_IPTABLES;;
+	esac
+}
+
+INSTALL_SOCKS5(){
 	case "${release}" in
 	centos)
 		yum -y install iptables firewalld iptables-services
 		yum -y install gcc zip git curl wget unzip screen net-tools pam-devel openssl-devel openldap-devel;;
 	*)
-		apt-get -y install iptables firewalld iptables-services
+		apt-get -y install iptables iptables-services
 		apt-get -y install gcc zip git curl wget unzip screen net-tools pam-devel openssl-devel openldap-devel;;
 	esac
-	#安装
+
 	wget -P /root "http://downloads.sourceforge.net/project/ss5/ss5/3.8.9-8/ss5-3.8.9-8.tar.gz"
-	tar -xzvf ss5-3.8.9-8.tar.gz;cd ss5-3.8.9;./configure;make;make install
-	#认证
+	tar -xzvf ss5-3.8.9-8.tar.gz;cd ss5-3.8.9;./configure;make;make install;rm -rf /root/ss5-3.8.9-8.tar.gz
 	sed -i '87c auth    0.0.0.0/0               -              u' /etc/opt/ss5/ss5.conf
 	sed -i '203c permit  u       0.0.0.0/0       -       0.0.0.0/0       -       -       -       -       -' /etc/opt/ss5/ss5.conf
-	#配置
 	sed -i '18c  [[ ${NETWORKING} = "no" ]] && exit 0' /etc/rc.d/init.d/ss5
+	
+	#关闭防火墙(iptables,firewalld)
+	CLOSE_THE_FIREWALL
+	
 	chmod u+x /etc/rc.d/init.d/ss5
 	chkconfig --add ss5
 	chkconfig ss5 on
 	service ss5 start
-	#删除
-	rm -rf /root/ss5-3.8.9-8.tar.gz
 }
 
-ADD_USER(){
-	read -p "连接用户:" USER_NAME
-		if [[ ${USER_NAME} = '' ]];then
-			echo "该项不允许为空.";exit 0
-		fi
-	read -p "连接密码:" USER_PASSWD
-		if [[ ${USER_PASSWD} = '' ]];then
-			echo "该项不允许为空.";exit 0
-		fi
-	echo "${USER_NAME} ${USER_PASSWD}" >> /etc/opt/ss5/ss5.passwd
-	service ss5 start > /dev/null
-	echo "添加完成,连接用户:${USER_NAME},连接密码:${USER_PASSWD}"
+UNINSTALL_SOCKS5(){
+	INSTALL_CHECK
+	cd ss5-3.8.9
+	make uninstall
 }
 
-DELETE_USER(){
-	echo "当前用户列表如下:"
-	cat -n /etc/opt/ss5/ss5.passwd;echo
-	
-	read -p "请输入需要删除的连接用户ID:" DELETE_USER_ID
-		if [[ ${DELETE_USER_ID} = '' ]];then
-			echo "该项不允许为空.";exit 0
-		fi
-	sed -i "${DELETE_USER_ID}d" /etc/opt/ss5/ss5.passwd
-	service ss5 start > /dev/null
-	echo "已删除该连接用户."
+INSTALL_BBR(){
+	wget --no-check-certificate "https://github.com/teddysun/across/raw/master/bbr.sh"
+	chmod +x bbr.sh
+	./bbr.sh
 }
 
-Shut_down_iptables(){
-	iptables -F;iptables -X
-	iptables -I INPUT -p tcp -m tcp --dport 1:65535 -j ACCEPT
-	iptables -I INPUT -p udp -m udp --dport 1:65535 -j ACCEPT
-	iptables-save > /etc/sysconfig/iptables
-	echo 'iptables-restore /etc/sysconfig/iptables' >> /etc/rc.local
+INSTALL_SERVERSPEEDER(){
+	wget -N --no-check-certificate "https://github.com/91yun/serverspeeder/raw/master/serverspeeder.sh"
+	bash serverspeeder.sh
 }
 
-Shut_down_firewall(){
-	systemctl stop firewalld.service
-	systemctl disable firewalld.service
+INSTALL_FAIL2BAN(){
+	wget "https://raw.githubusercontent.com/FunctionClub/Fail2ban/master/fail2ban.sh"
+	bash fail2ban.sh
 }
 
-Check_Install(){
-	if [ ! -f /etc/opt/ss5/ss5.conf ];then
-		echo "Socks5尚未安装.";exit 0
-	fi
-}
+INTERACTION(){
+clear;echo "##################################
+# 【安装/卸载】                  #
+# [1]安装Socks5                  #
+# [2]卸载Socks5                  #
+##################################
+# 【用户管理】                   #
+# [3]添加用户                    #
+# [4]删除用户                    #
+##################################
+# 【服务管理】                   #
+# [5]启动Socks5                  #
+# [6]停止Socks5                  #
+# [7]重启Socks5                  #
+# [8]查看运行状态                #
+##################################
+# 【其他选项】                   #
+# [a]安装BBR                     #
+# [b]安装锐速                    #
+# [c]安装fail2ban                #
+##################################
+# s5 {start|stop|restart|status} #
+##################################"
+read -p "请选择选项:" OPTIONS
 
-clear;echo "#############################
-# 【安装/卸载】             #
-# [1]安装Socks5             #
-# [2]卸载Socks5             #
-#############################
-# 【用户管理】              #
-# [3]添加用户               #
-# [4]删除用户               #
-#############################
-# 【服务管理】              #
-# [5]启动Socks5             #
-# [6]停止Socks5             #
-# [7]重启Socks5             #
-# [8]查看运行状态           #
-#############################
-# 【其他选项】              #
-# [9]安装fail2ban           #
-#############################"
-read -p "请选择选项:" SS5_Options
-
-echo;case "${SS5_Options}" in
+case "${OPTIONS}" in
 	1)
-	Check_OS
-	Install_Socks5
-	Shut_down_iptables
-	Shut_down_firewall;;
+	CHECK_OS
+	INSTALL_SOCKS5;;
 	2)
-	Check_Install
-	echo "该选项功能尚未完善.";;
+	UNINSTALL_SOCKS5;;
 	3)
-	Check_Install
 	ADD_USER;;
 	4)
-	Check_Install
 	DELETE_USER;;
 	5)
-	Check_Install
+	INSTALL_CHECK
 	service ss5 start;;
 	6)
-	Check_Install
+	INSTALL_CHECK
 	service ss5 stop;;
 	7)
-	Check_Install
+	INSTALL_CHECK
 	service ss5 restart;;
 	8)
-	Check_Install
+	INSTALL_CHECK
 	service ss5 status;;
-	9)
-	if [ ! -f /root/fail2ban.sh ];then
-		wget "https://raw.githubusercontent.com/qinghuas/ss-panel-and-ss-py-mu/master/tools/fail2ban.sh"
-	fi
-	bash fail2ban.sh;;
+	a)
+	INSTALL_BBR;;
+	b)
+	INSTALL_SERVERSPEEDER;;
+	c)
+	INSTALL_FAIL2BAN;;
 	*)
-	echo "选项不在范围内.";;
+	echo;echo "选项不在范围.";;
 esac
+}
+
+SOCKS_OPTIONS=$1
+SOCKS_OPTIONS_TWO=$2
+
+#s5 {start|stop|restart|status}
+if [[ ${SOCKS_OPTIONS} = "start" ]];then
+	INSTALL_CHECK;service ss5 start;echo "Done."
+elif [[ ${SOCKS_OPTIONS} = "stop" ]];then
+	INSTALL_CHECK;service ss5 stop;echo "Done."
+elif [[ ${SOCKS_OPTIONS} = "restart" ]];then
+	INSTALL_CHECK;service ss5 restart;echo "Done."
+elif [[ ${SOCKS_OPTIONS} = "status" ]];then
+	INSTALL_CHECK;service ss5 status
+elif [[ ${SOCKS_OPTIONS} = "install" ]];then
+	CHECK_OS;INSTALL_SOCKS5
+elif [[ ${SOCKS_OPTIONS} = "uninstall" ]];then
+	INSTALL_CHECK;UNINSTALL_SOCKS5
+elif [[ ${SOCKS_OPTIONS} = "user" ]];then
+	if [[ ${SOCKS_OPTIONS_TWO} = "add" ]];then
+		clear;ADD_USER
+	elif [[ ${SOCKS_OPTIONS_TWO} = "del" ]];then
+		clear;DELETE_USER
+	fi
+else
+	INTERACTION
+fi
 
 #END
