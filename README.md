@@ -15,7 +15,7 @@ apt-get -y install git wget curl zip unzip screen
 Installation
 ---
 ```
-wget https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5.sh
+wget https://raw.githubusercontent.com/AmirSbss/socks5-install/master/ss5.sh
 ```
 ```
 bash ss5.sh
