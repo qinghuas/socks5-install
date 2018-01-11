@@ -20,40 +20,40 @@ CHECK_OS(){
 
 INSTALL_CHECK(){
 	if [ ! -f /etc/opt/ss5/ss5.conf ];then
-		echo "Socks5似乎尚未安装.";exit
+		echo "Socks5 not installed yet.";exit
 	fi
 }
 
 ADD_USER(){
 	INSTALL_CHECK
-	read -p "请设置连接用户:" USER_NAME
+	read -p "Enter the connection user:" USER_NAME
 		if [[ ${USER_NAME} = '' ]];then
-			echo "该项不允许为空.";exit
+			echo "This item is not allowed to be blank.";exit
 		fi
-	read -p "请设置连接密码:" USER_PASSWD
+	read -p "Enter the connection password:" USER_PASSWD
 		if [[ ${USER_PASSWD} = '' ]];then
-			echo "该项不允许为空.";exit
+			echo "This item is not allowed to be blank.";exit
 		fi
 	echo "${USER_NAME} ${USER_PASSWD}" >> /etc/opt/ss5/ss5.passwd
 	service ss5 start > /dev/null
 	
 	IP_ADDRESS=`curl -s https://ipv4.appspot.com`
-	echo "连接地址:${IP_ADDRESS} 连接端口:1080 连接用户:${USER_NAME},连接密码:${USER_PASSWD}"
+	echo "Connection address:${IP_ADDRESS} | Connection port:1080 | Connection user:${USER_NAME} | Connection password:${USER_PASSWD}"
 }
 
 DELETE_USER(){
 	INSTALL_CHECK
-	echo "当前用户如下:"
+	echo "Current users information:"
 	cat -n /etc/opt/ss5/ss5.passwd;echo
 	
-	read -p "需要删除的用户ID:" DELETE_USER_ID
+	read -p "User ID to delete:" DELETE_USER_ID
 		if [[ ${DELETE_USER_ID} = '' ]];then
-			echo "该项不允许为空.";exit
+			echo "This item is not allowed to be blank.";exit
 		fi
 		
 	sed -i "${DELETE_USER_ID}d" /etc/opt/ss5/ss5.passwd
 	service ss5 start > /dev/null
-	echo "删除完成."
+	echo "User deleted."
 }
 
 CLOSE_THE_FIREWALL(){
@@ -97,7 +97,7 @@ INSTALL_SOCKS5(){
 	sed -i '203c permit  u       0.0.0.0/0       -       0.0.0.0/0       -       -       -       -       -' /etc/opt/ss5/ss5.conf
 	sed -i '18c  [[ ${NETWORKING} = "no" ]] && exit 0' /etc/rc.d/init.d/ss5
 	
-	#关闭防火墙(iptables,firewalld)
+	#Turn off the firewall (iptables,firewalld)
 	CLOSE_THE_FIREWALL
 	
 	chmod u+x /etc/rc.d/init.d/ss5
@@ -130,26 +130,26 @@ INSTALL_FAIL2BAN(){
 
 INTERACTION(){
 clear;echo "##################################
-# 【安装/卸载】                  #
-# [1]安装Socks5                  #
-# [2]卸载Socks5                  #
+# 【Install/Uninstall】          #
+# [1]Install Socks5              #
+# [2]Uninstall Socks5            #
 ##################################
-# 【用户管理】                   #
-# [3]添加用户                    #
-# [4]删除用户                    #
+# 【User Management】            #
+# [3]Add user                    #
+# [4]Delete user                 #
 ##################################
-# 【服务管理】                   #
-# [5]启动Socks5                  #
-# [6]停止Socks5                  #
-# [7]重启Socks5                  #
-# [8]查看运行状态                #
+# 【Service management】         #
+# [5]Start Socks5                #
+# [6]Stop Socks5                 #
+# [7]Restart Socks5              #
+# [8]Check the running status    #
 ##################################
-# 【其他选项】                   #
-# [a]安装BBR                     #
-# [b]安装锐速                    #
-# [c]安装fail2ban                #
+# 【Other options】              #
+# [a]Install BBR                 #
+# [b]Install sharpness           #
+# [c]Install fail2ban            #
 ##################################"
-read -p "请选择选项:" OPTIONS
+read -p "Please select an option:" OPTIONS
 
 case "${OPTIONS}" in
 	1)
@@ -180,7 +180,7 @@ case "${OPTIONS}" in
 	c)
 	INSTALL_FAIL2BAN;;
 	*)
-	echo;echo "选项不在范围.";;
+	echo;echo "Option out of range.";;
 esac
 }
 

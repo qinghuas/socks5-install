@@ -1,7 +1,7 @@
 # Socks5 Install
-Telegram支持Socks5代理，设置好后就可以当“QQ”用了，网上的教程均是手动部署，而我能懒则懒，因此本脚本应运而生。脚本提供最基本的功能，即安装 / 卸载Socks5，添加 / 删除用户
+Telegram support Socks5 proxy, set up can be used as "QQ", the online tutorials are manually deployed, and I lazy lazy, so this script came into being. Scripting provides the most basic features, namely, install / uninstall Socks5, add / delete users
 
-准备
+Requirements
 ---
 Centos
 ```
@@ -12,7 +12,7 @@ Debian/Ubuntu
 apt-get -y install git wget curl zip unzip screen
 ```
 
-安装
+Installation
 ---
 ```
 wget https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5.sh
@@ -21,28 +21,28 @@ wget https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5.sh
 bash ss5.sh
 ```
 
-快捷选项
+Shortcut options
 ---
-用户添加 / 删除  
+Add/Delete user
 `bash ss5.sh  user {add|del}`  
 
-Socks5 安装 / 卸载  
+Socks5 install/uninstall  
 `bash ss5.sh {install|uninstall}`  
 
-Socks5 启动 / 停止 / 重启 / 状态  
+Socks5 start/stop/restart/status  
 `bash ss5.sh {start|stop|restart|status}`  
 
-选项预览
+Options preview
 ---
-![](https://raw.githubusercontent.com/qinghuas/socks5-install/master/ss5-options.png)
+![](https://raw.githubusercontent.com/AmirSbss/socks5-install/patch-1/ss5-options.png)
 
-更新日志
+Update log
 ---
 `2017-12-23`  
-- 增添功能快捷选项  
+- Added shortcut options  
 
-其他说明
+Other instructions
 ---
-1.可以在安装Socks5之前安装BBR/锐速来为Socks5加速  
+1.You can install Socks5 before installing BBR / Sphinx speed to accelerate
 
-2.Socks5安装完成后，需要添加用户才能使用
+2.You need to add users to use Socks5
