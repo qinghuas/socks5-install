@@ -34,7 +34,7 @@ Socks5 start/stop/restart/status
 
 Options preview
 ---
-![](https://raw.githubusercontent.com/AmirSbss/socks5-install/patch-1/ss5-options.png)
+![](https://raw.githubusercontent.com/AmirSbss/socks5-install/master/ss5-options.png)
 
 Update log
 ---
