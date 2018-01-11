@@ -130,21 +130,21 @@ INSTALL_FAIL2BAN(){
 
 INTERACTION(){
 clear;echo "##################################
-# 【Install/Uninstall】           #
+# 【Install/Uninstall】          #
 # [1]Install Socks5              #
 # [2]Uninstall Socks5            #
 ##################################
-# 【User Management】             #
+# 【User Management】            #
 # [3]Add user                    #
 # [4]Delete user                 #
 ##################################
-# 【Service management】          #
+# 【Service management】         #
 # [5]Start Socks5                #
 # [6]Stop Socks5                 #
 # [7]Restart Socks5              #
 # [8]Check the running status    #
 ##################################
-# 【Other options】               #
+# 【Other options】              #
 # [a]Install BBR                 #
 # [b]Install sharpness           #
 # [c]Install fail2ban            #
