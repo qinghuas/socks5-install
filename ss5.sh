@@ -19,8 +19,8 @@ CHECK_OS(){
 }
 
 INSTALL_CHECK(){
-	if [ ! -f /etc/opt/ss5/ss5.conf ];then
-		echo "Socks5似乎尚未安装.";exit
+	if [ ! -e /etc/opt/ss5/ss5.conf ];then
+		echo "Socks5尚未安装.";exit
 	fi
 }
 
@@ -37,7 +37,7 @@ ADD_USER(){
 	echo "${USER_NAME} ${USER_PASSWD}" >> /etc/opt/ss5/ss5.passwd
 	service ss5 start > /dev/null
 	
-	IP_ADDRESS=`curl -s https://ipv4.appspot.com`
+	IP_ADDRESS=$(curl -s ipv4.ip.sb)
 	echo "连接地址:${IP_ADDRESS} 连接端口:1080 连接用户:${USER_NAME},连接密码:${USER_PASSWD}"
 }
 
@@ -82,6 +82,7 @@ CLOSE_THE_FIREWALL(){
 }
 
 INSTALL_SOCKS5(){
+	CHECK_OS
 	case "${release}" in
 	centos)
 		yum -y install iptables firewalld iptables-services
@@ -104,12 +105,26 @@ INSTALL_SOCKS5(){
 	chkconfig --add ss5
 	chkconfig ss5 on
 	service ss5 start
+	
+	echo;echo "Socks5已经安装完成了,添加用户后,便可使用."
 }
 
 UNINSTALL_SOCKS5(){
-	INSTALL_CHECK
-	cd ss5-3.8.9
-	make uninstall
+	if [ -e /etc/opt/ss5/ss5.conf ];then
+		read -p "确认卸载Socks5? [y/n]:" REPLY
+		case "${REPLY}" in
+			y)
+				echo "卸载中..."
+				cd /root/ss5-3.8.9
+				make uninstall
+				rm -rf /root/ss5-3.8.9
+				echo "卸载完成.";;
+			*)
+				echo "取消卸载.";;
+		esac
+	else
+		echo "Socks5尚未安装哦."
+	fi
 }
 
 INSTALL_BBR(){
@@ -153,8 +168,11 @@ read -p "请选择选项:" OPTIONS
 
 case "${OPTIONS}" in
 	1)
-	CHECK_OS
-	INSTALL_SOCKS5;;
+	if [ -e /etc/opt/ss5/ss5.conf ];then
+		echo "Socks5已经安装了.";exit
+	else
+		INSTALL_SOCKS5
+	fi;;
 	2)
 	UNINSTALL_SOCKS5;;
 	3)
@@ -184,30 +202,41 @@ case "${OPTIONS}" in
 esac
 }
 
-SOCKS_OPTIONS=$1
-SOCKS_OPTIONS_TWO=$2
+case "${1}" in
+	start)
+		INSTALL_CHECK
+		service ss5 start
+		echo "Done.";;
+	stop)
+		INSTALL_CHECK
+		service ss5 stop
+		echo "Done.";;
+	restart)
+		INSTALL_CHECK
+		service ss5 restart
+		echo "Done.";;
+	status)
+		INSTALL_CHECK
+		service ss5 status;;
+	install)
+		if [ -e /etc/opt/ss5/ss5.conf ];then
+			echo "Socks5已经安装了.";exit
+		else
+			INSTALL_SOCKS5
+		fi;;
+	uninstall)
+		UNINSTALL_SOCKS5;;
+	user)
+		case "${2}" in
+			add)
+				clear;ADD_USER;;
+			del)
+				clear;DELETE_USER;;
+			*)
+				echo "bash ss5.sh user {add|del}";;
+		esac;;
+	*)
+		INTERACTION;;
+esac
 
-#s5 {start|stop|restart|status}
-if [[ ${SOCKS_OPTIONS} = "start" ]];then
-	INSTALL_CHECK;service ss5 start;echo "Done."
-elif [[ ${SOCKS_OPTIONS} = "stop" ]];then
-	INSTALL_CHECK;service ss5 stop;echo "Done."
-elif [[ ${SOCKS_OPTIONS} = "restart" ]];then
-	INSTALL_CHECK;service ss5 restart;echo "Done."
-elif [[ ${SOCKS_OPTIONS} = "status" ]];then
-	INSTALL_CHECK;service ss5 status
-elif [[ ${SOCKS_OPTIONS} = "install" ]];then
-	CHECK_OS;INSTALL_SOCKS5
-elif [[ ${SOCKS_OPTIONS} = "uninstall" ]];then
-	INSTALL_CHECK;UNINSTALL_SOCKS5
-elif [[ ${SOCKS_OPTIONS} = "user" ]];then
-	if [[ ${SOCKS_OPTIONS_TWO} = "add" ]];then
-		clear;ADD_USER
-	elif [[ ${SOCKS_OPTIONS_TWO} = "del" ]];then
-		clear;DELETE_USER
-	fi
-else
-	INTERACTION
-fi
-
-#END
+#END 2018-02-15
