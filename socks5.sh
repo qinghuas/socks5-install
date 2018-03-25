@@ -206,11 +206,12 @@ if [ -e /etc/opt/ss5/ss5.conf ];then
 			clear
 			SHOW_SOCKS5
 			echo "GitHub : https://github.com/qinghuas/socks5-install"
-			echo "By : @qinghuas V.2.0.2 2018-03-25";;
+			echo "By : @qinghuas V.2.0.3 2018-03-25";;
 		*)
 			SHOW_SOCKS5
+			echo "socks5 {update|info}"
 			echo "socks5 user {add|del|list}"
-			echo "socks5 {install|uninstall|update}"
+			echo "socks5 {install|uninstall}"
 			echo "socks5 {start|stop|restart|status}";;
 	esac
 else
