@@ -183,8 +183,10 @@ if [ -e /etc/opt/ss5/ss5.conf ];then
 					ADD_USER ${command_3} ${command_4};;
 				del)
 					DEL_USER;;
+				list)
+					clear;cat -n /etc/opt/ss5/ss5.passwd;;
 				*)
-					echo "socks5 user del"
+					echo "socks5 user {del|list}"
 					echo "socks5 user add \$username \$password";;
 			esac;;
 		start)
@@ -200,9 +202,14 @@ if [ -e /etc/opt/ss5/ss5.conf ];then
 			wget -O /usr/bin/socks5 "https://raw.githubusercontent.com/qinghuas/socks5-install/master/socks5.sh"
 			chmod 755 /usr/bin/socks5
 			echo "Update Done.";;
+		info)
+			clear
+			SHOW_SOCKS5
+			echo "GitHub:https://github.com/qinghuas/socks5-install"
+			echo "By:@qinghuas V.2.0.1 2018-03-25";;
 		*)
 			SHOW_SOCKS5
-			echo "socks5 user {add|del}"
+			echo "socks5 user {add|del|list}"
 			echo "socks5 {install|uninstall|update}"
 			echo "socks5 {start|stop|restart|status}";;
 	esac
